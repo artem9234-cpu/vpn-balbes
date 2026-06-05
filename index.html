@@ -117,13 +117,16 @@
     </div>
 
     <script>
-        // Автоматическое скачивание, если передан параметр ?file=black или ?file=white
+        // Проверяем параметры URL для авто-скачивания
         const urlParams = new URLSearchParams(window.location.search);
         const autoFile = urlParams.get('file');
+        
         if (autoFile === 'black' || autoFile === 'white') {
             const filename = autoFile === 'black' ? 'VPN_Black_List.txt' : 'VPN_White_List.txt';
-            downloadFile(autoFile, filename);
-            // Убираем параметр из URL, чтобы не скачивалось повторно при обновлении
+            setTimeout(() => {
+                downloadFile(autoFile, filename);
+            }, 500);
+            // Убираем параметр из URL
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 
@@ -153,6 +156,11 @@
                 
                 status.className = 'status success';
                 status.textContent = '✅ Файл ' + filename + ' скачан! Теперь добавь его в Hiddify/NekoBox';
+                
+                // Скрываем сообщение через 5 секунд
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 5000);
             } catch (error) {
                 status.className = 'status error';
                 status.textContent = '❌ ' + error.message;
