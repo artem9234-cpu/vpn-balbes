@@ -47,6 +47,8 @@
             cursor: pointer;
             transition: all 0.3s ease;
             color: white;
+            text-decoration: none;
+            text-align: center;
         }
         .btn-black {
             background: linear-gradient(135deg, #2c3e50 0%, #4a5568 100%);
@@ -57,9 +59,6 @@
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-        .btn:active {
-            transform: translateY(0);
         }
         .info {
             background: #f0f4ff;
@@ -72,24 +71,6 @@
             line-height: 1.6;
         }
         .info b { color: #333; }
-        .status {
-            text-align: center;
-            margin-top: 15px;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            display: none;
-        }
-        .status.success {
-            display: block;
-            background: #d4edda;
-            color: #155724;
-        }
-        .status.error {
-            display: block;
-            background: #f8d7da;
-            color: #721c24;
-        }
     </style>
 </head>
 <body>
@@ -97,13 +78,18 @@
         <h1>🔐 VPN конфиги</h1>
         <p class="subtitle">Скачай файл и добавь в Hiddify / NekoBox</p>
         
-        <button class="btn btn-black" onclick="downloadFile('black', 'VPN_Black_List.txt')">
+        <!-- Используем jsDelivr CDN для принудительного скачивания -->
+        <a href="https://cdn.jsdelivr.net/gh/artem9234-cpu/vpn-balbes@main/black.txt" 
+           class="btn btn-black" 
+           download="VPN_Black_List.txt">
             ⚫ Скачать черные списки
-        </button>
+        </a>
         
-        <button class="btn btn-white" onclick="downloadFile('white', 'VPN_White_List.txt')">
+        <a href="https://cdn.jsdelivr.net/gh/artem9234-cpu/vpn-balbes@main/white.txt" 
+           class="btn btn-white" 
+           download="VPN_White_List.txt">
             ⚪ Скачать белые списки
-        </button>
+        </a>
         
         <div class="info">
             <b>📱 Как использовать:</b><br>
@@ -112,59 +98,25 @@
             3️⃣ Открой Hiddify или NekoBox<br>
             4️⃣ Нажми «Добавить из файла» и выбери скачанный .txt
         </div>
-        
-        <div id="status" class="status"></div>
     </div>
 
     <script>
-        // Проверяем параметры URL для авто-скачивания
+        // Для авто-скачивания через параметры URL
         const urlParams = new URLSearchParams(window.location.search);
         const autoFile = urlParams.get('file');
         
         if (autoFile === 'black' || autoFile === 'white') {
-            const filename = autoFile === 'black' ? 'VPN_Black_List.txt' : 'VPN_White_List.txt';
             setTimeout(() => {
-                downloadFile(autoFile, filename);
+                const link = document.createElement('a');
+                link.href = autoFile === 'black' 
+                    ? 'https://cdn.jsdelivr.net/gh/artem9234-cpu/vpn-balbes@main/black.txt'
+                    : 'https://cdn.jsdelivr.net/gh/artem9234-cpu/vpn-balbes@main/white.txt';
+                link.download = autoFile === 'black' ? 'VPN_Black_List.txt' : 'VPN_White_List.txt';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }, 500);
-            // Убираем параметр из URL
             window.history.replaceState({}, document.title, window.location.pathname);
-        }
-
-        async function downloadFile(type, filename) {
-            const status = document.getElementById('status');
-            status.className = 'status';
-            status.textContent = '⏳ Загрузка...';
-            status.style.display = 'block';
-            
-            try {
-                const sourceUrl = type === 'black' 
-                    ? 'https://raw.githubusercontent.com/artem9234-cpu/vpn-balbes/main/black.txt'
-                    : 'https://raw.githubusercontent.com/artem9234-cpu/vpn-balbes/main/white.txt';
-                
-                const response = await fetch(sourceUrl);
-                if (!response.ok) throw new Error('Ошибка загрузки: ' + response.status);
-                
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                
-                status.className = 'status success';
-                status.textContent = '✅ Файл ' + filename + ' скачан! Теперь добавь его в Hiddify/NekoBox';
-                
-                // Скрываем сообщение через 5 секунд
-                setTimeout(() => {
-                    status.style.display = 'none';
-                }, 5000);
-            } catch (error) {
-                status.className = 'status error';
-                status.textContent = '❌ ' + error.message;
-            }
         }
     </script>
 </body>
